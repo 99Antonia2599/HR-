@@ -31,7 +31,6 @@ FEEDS = [
     ("Persoblogger",          "https://persoblogger.de/feed/"),
     ("HRM Online",            "https://www.hrm.de/feed/"),
     ("Arbeitsrecht.de",       "https://www.arbeitsrecht.de/feed/"),
-    ("t3n Karriere",          "https://t3n.de/rss.xml"),  # wird per Keyword gefiltert
     # ── Paywall-Quellen (RSS-Vorschau oft ausreichend) ──
     ("FAZ Beruf & Chance",    "https://www.faz.net/rss/aktuell/beruf-chance/"),
     ("Handelsblatt Karriere", "https://www.handelsblatt.com/contentexport/feed/karriere"),
@@ -81,6 +80,16 @@ ALL_KEYWORDS += ["personal", "hr", "human resources", "mitarbeiter",
 MAX_AGE_DAYS = 7
 MAX_ARTICLES = 30
 
+# Artikel mit diesen Begriffen im Titel werden aussortiert
+BLACKLIST = [
+    "amazon", "prime day", "angebot", "rabatt", "gutschein", "deal",
+    "fritzbox", "router", "iphone", "ipad", "apple watch", "samsung",
+    "playstation", "xbox", "nintendo", "netflix", "spotify",
+    "rezept", "kochen", "reise", "urlaub", "hotel", "flug",
+    "aktie", "bitcoin", "krypto", "etf", "depot", "börse",
+    "streaming", "smart home", "gadget", "testbericht",
+]
+
 # ── Hilfsfunktionen ────────────────────────────────────────
 
 def clean_html(text):
@@ -101,6 +110,32 @@ def parse_date(entry):
 def matches_any(text, keywords):
     t = text.lower()
     return any(k in t for k in keywords)
+
+
+def is_blacklisted(title):
+    """Filtert offensichtlich irrelevante Artikel (Werbung, Tech-Deals etc.)."""
+    t = title.lower()
+    return any(b in t for b in BLACKLIST)
+
+
+def is_relevant(title, summary, keywords):
+    """Prüft ob ein Artikel wirklich HR-relevant ist.
+    
+    Strenger als nur matches_any: 
+    - Keyword im Titel = relevant
+    - Kein Keyword im Titel, aber mind. 2 im Text = relevant
+    - Nur 1 Keyword im Text = zu ungenau, rausfiltern
+    """
+    if is_blacklisted(title):
+        return False
+    
+    title_lower = title.lower()
+    if any(k in title_lower for k in keywords):
+        return True
+    
+    text_lower = summary.lower()
+    hits = sum(1 for k in keywords if k in text_lower)
+    return hits >= 2
 
 
 def categorize(text):
@@ -355,7 +390,7 @@ def scrape():
             title = getattr(entry, "title", "")
             rss_summary = clean_html(getattr(entry, "summary", ""))
 
-            if not matches_any(f"{title} {rss_summary}", ALL_KEYWORDS):
+            if not is_relevant(title, rss_summary, ALL_KEYWORDS):
                 continue
 
             seen.add(link)
