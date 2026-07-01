@@ -1,0 +1,30 @@
+name: Weekly HR News Digest
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+jobs:
+  generate-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Generate HR Digest
+        run: |
+          if [ -f MODEL_Logo_Medium.jpg ]; then
+            python hr_digest.py --logo MODEL_Logo_Medium.jpg
+          else
+            python hr_digest.py
+          fi
+      - run: mkdir -p output && mv *.html output/ 2>/dev/null || true
+      - run: |
+          git config user.name "HR News Bot"
+          git config user.email "bot@noreply.github.com"
+          git add output/
+          git diff --staged --quiet || git commit -m "📰 HR News Digest $(date +%Y-%m-%d)"
+          git push
