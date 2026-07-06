@@ -1,0 +1,54 @@
+name: HR Digest — Model AG
+
+on:
+  schedule:
+    # Jeden Montag 07:00 UTC (08:00/09:00 Schweizer Zeit)
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      format:
+        description: 'Ausgabeformat'
+        type: choice
+        default: 'digest'
+        options:
+          - digest        # Format A — Kurzdigest (Default)
+          - full-report   # Format B — Vollständiger HR Intelligence Report
+
+permissions:
+  contents: write
+
+jobs:
+  generate-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate HR Digest
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.format }}" = "full-report" ]; then
+            ARGS="--full"
+          fi
+          if [ -f MODEL_Logo_Medium.jpg ]; then
+            python hr_digest.py $ARGS --logo MODEL_Logo_Medium.jpg
+          else
+            python hr_digest.py $ARGS
+          fi
+
+      - name: Move output
+        run: mkdir -p output && mv *.html output/ 2>/dev/null || true
+
+      - name: Commit and push
+        run: |
+          git config user.name "HR News Bot"
+          git config user.email "bot@noreply.github.com"
+          git add output/
+          git diff --staged --quiet || git commit -m "HR Digest $(date +%Y-%m-%d)"
+          git push
