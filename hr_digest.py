@@ -37,24 +37,26 @@ from collections import defaultdict
 # VDI, EU AI Act) erscheinen als Jahres-/Referenzstudien und
 # werden über die Sekundärquellen (SRF, Personalwirtschaft,
 # Böckler/WSI, IW Köln) miterfasst.
+# Alle URLs verifiziert per check-feeds-Lauf am 07.07.2026.
+# Pool-Quellen OHNE funktionierenden öffentlichen RSS-Feed (BFS,
+# Bundesrat/admin.ch, Böckler/WSI, ifo, IW Köln/KOFA, DIHK, BA,
+# Swissstaffing, HRpuls) werden über die Sekundärquellen SRF und
+# Personalwirtschaft miterfasst — gemäss Pool ist SRF explizit
+# Sekundärquelle für offizielle Berichte. Neue Feed-Kandidaten
+# vor Aufnahme mit `python hr_digest.py --check-feeds` testen
+# (in GitHub Actions: Run workflow → check-feeds).
 FEEDS = [
     # ── Schweiz ──
-    ("SRF Wirtschaft",              "https://www.srf.ch/news/wirtschaft.rss"),
-    ("KOF ETH Konjunktur",          "https://kof.ethz.ch/news-und-veranstaltungen/news.rss.xml"),
-    ("Bundesrat / admin.ch",        "https://www.admin.ch/gov/de/start/dokumentation/medienmitteilungen.rss.html"),
-    ("BFS Neues",                   "https://www.bfs.admin.ch/bfs/de/home/aktuell/neue-veroeffentlichungen.gnpdetail.rss.html"),
-    ("Swissstaffing",               "https://www.swissstaffing.ch/feed/"),
+    ("SRF News",              "https://www.srf.ch/news/bnf/rss/1646"),
+    ("SRF News (Wirtschaft)", "https://www.srf.ch/news/bnf/rss/1926"),
+    ("KOF ETH Konjunktur",    "https://kof.ethz.ch/news-und-veranstaltungen/news.rss.xml"),  # derzeit 0 Einträge, beobachten
 
     # ── Deutschland ──
-    ("WSI / Hans-Böckler-Stiftung", "https://www.boeckler.de/de/boeckler-impuls-rss.xml"),
-    ("IAB Forschung",               "https://www.iab-forum.de/feed/"),
-    ("ifo Institut",                "https://www.ifo.de/feed/rss/ifo-news"),
-    ("IW Köln / KOFA",              "https://www.iwkoeln.de/rss/presse.xml"),
+    ("IAB Forschung",         "https://iab-forum.de/feed/"),
 
-    # ── HR-Tech / KI im Personalwesen ──
-    ("Personalwirtschaft",          "https://www.personalwirtschaft.de/rss/feed.xml"),
-    ("HRpuls",                      "https://hrpuls.de/feed/"),
-    ("KI im Personalwesen",         "https://ki-im-personalwesen.de/feed/"),
+    # ── HR-Fachmedien / HR-Tech / KI im Personalwesen ──
+    ("Personalwirtschaft",    "https://www.personalwirtschaft.de/feed/"),
+    ("KI im Personalwesen",   "https://www.ki-im-personalwesen.de/feed/"),
 ]
 
 # ── Die 5 Themen (Section 5) ──────────────────────────────
@@ -369,6 +371,35 @@ def summarize_text(text, title, num_sentences=3):
     top = scored[:num_sentences]
     top.sort(key=lambda x: x[1])
     return " ".join(s[2] for s in top)
+
+
+# ── Feed-Diagnose ──────────────────────────────────────────
+
+def check_feeds():
+    """Prüft jeden Feed: erreichbar? Wie viele Einträge? Wie aktuell?"""
+    print(f"{'Feed':<30} {'HTTP':>5} {'Einträge':>9} {'Neuester':>12}  Hinweis")
+    print("-" * 85)
+    for name, url in FEEDS:
+        try:
+            feed = feedparser.parse(url, agent="Mozilla/5.0 (HRDigest)")
+        except Exception as e:
+            print(f"{name:<30} {'ERR':>5} {'-':>9} {'-':>12}  {e}")
+            continue
+        status = feed.get("status", "?")
+        entries = len(feed.entries)
+        newest = "-"
+        if feed.entries:
+            d = parse_date(feed.entries[0])
+            if d:
+                newest = d.strftime("%d.%m.%Y")
+        hint = ""
+        if feed.bozo and entries == 0:
+            hint = f"Parse-Fehler: {getattr(feed, 'bozo_exception', '')}"
+        elif status in (301, 302) :
+            hint = f"Redirect → {feed.get('href', '')}"
+        elif status == 404 or entries == 0:
+            hint = "TOT oder leer — URL prüfen"
+        print(f"{name:<30} {status:>5} {entries:>9} {newest:>12}  {hint}")
 
 
 # ── RSS Scraping ───────────────────────────────────────────
@@ -992,7 +1023,15 @@ def main():
         "--output", type=str, default=None,
         help="Ausgabe-Dateiname (Default: auto-generiert)"
     )
+    parser.add_argument(
+        "--check-feeds", action="store_true",
+        help="Nur Feed-Gesundheitscheck ausgeben, kein HTML erzeugen"
+    )
     args = parser.parse_args()
+
+    if args.check_feeds:
+        check_feeds()
+        return
 
     fmt = "B" if args.full else "A"
     fmt_label = "HR Intelligence Report (Format B)" if args.full else "HR Digest (Format A)"
