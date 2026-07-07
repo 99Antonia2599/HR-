@@ -37,24 +37,26 @@ from collections import defaultdict
 # VDI, EU AI Act) erscheinen als Jahres-/Referenzstudien und
 # werden über die Sekundärquellen (SRF, Personalwirtschaft,
 # Böckler/WSI, IW Köln) miterfasst.
+# Alle URLs verifiziert per check-feeds-Lauf am 07.07.2026.
+# Pool-Quellen OHNE funktionierenden öffentlichen RSS-Feed (BFS,
+# Bundesrat/admin.ch, Böckler/WSI, ifo, IW Köln/KOFA, DIHK, BA,
+# Swissstaffing, HRpuls) werden über die Sekundärquellen SRF und
+# Personalwirtschaft miterfasst — gemäss Pool ist SRF explizit
+# Sekundärquelle für offizielle Berichte. Neue Feed-Kandidaten
+# vor Aufnahme mit `python hr_digest.py --check-feeds` testen
+# (in GitHub Actions: Run workflow → check-feeds).
 FEEDS = [
     # ── Schweiz ──
-    ("SRF News",                    "https://www.srf.ch/news/bnf/rss/1646"),
-    ("SRF Wirtschaft (Kandidat)",   "https://www.srf.ch/news/bnf/rss/1926"),
-    ("KOF ETH Konjunktur",          "https://kof.ethz.ch/news-und-veranstaltungen/news.rss.xml"),
-    ("admin.ch NSB (Kandidat)",     "https://www.news.admin.ch/NSBSubscriber/message/rss/de"),
-    ("BFS (Kandidat)",              "https://www.bfs.admin.ch/bfs/de/home/aktuell/medienmitteilungen.rss.html"),
+    ("SRF News",              "https://www.srf.ch/news/bnf/rss/1646"),
+    ("SRF News (Wirtschaft)", "https://www.srf.ch/news/bnf/rss/1926"),
+    ("KOF ETH Konjunktur",    "https://kof.ethz.ch/news-und-veranstaltungen/news.rss.xml"),  # derzeit 0 Einträge, beobachten
 
     # ── Deutschland ──
-    ("Böckler Impuls (Kandidat)",   "https://www.boeckler.de/rss/boeckler-impuls.xml"),
-    ("IAB Forschung",               "https://iab-forum.de/feed/"),
-    ("ifo (Kandidat)",              "https://www.ifo.de/rss.xml"),
-    ("IW Köln (Kandidat)",          "https://www.iwkoeln.de/rss.xml"),
+    ("IAB Forschung",         "https://iab-forum.de/feed/"),
 
-    # ── HR-Tech / KI im Personalwesen ──
-    ("Personalwirtschaft (Kand.)",  "https://www.personalwirtschaft.de/feed/"),
-    ("HRpuls",                      "https://www.hrpuls.de/feed/"),
-    ("KI im Personalwesen",         "https://www.ki-im-personalwesen.de/feed/"),
+    # ── HR-Fachmedien / HR-Tech / KI im Personalwesen ──
+    ("Personalwirtschaft",    "https://www.personalwirtschaft.de/feed/"),
+    ("KI im Personalwesen",   "https://www.ki-im-personalwesen.de/feed/"),
 ]
 
 # ── Die 5 Themen (Section 5) ──────────────────────────────

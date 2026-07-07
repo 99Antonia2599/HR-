@@ -151,11 +151,14 @@ These are the sources you prioritise during web search. They are the source univ
 - Job-board marketing content disguised as research
 
 > **Hinweis zur RSS-Umsetzung:** `hr_digest.py` erfasst die Pool-Quellen mit
-> öffentlichem RSS-Feed direkt. Quellen ohne Feed (UBS, Mercer, Deloitte,
-> McKinsey, Gartner, Workday, Kienbaum, BCG, Adecco/Stellenmarkt-Monitor,
-> Swissmem, IGBCE/BAVC, DIHK, BA, VDI) sind Jahres-/Referenzstudien und werden
-> über die Sekundärquellen (SRF, Personalwirtschaft, Böckler/WSI, IW Köln)
-> miterfasst.
+> funktionierendem öffentlichem RSS-Feed direkt (verifiziert Juli 2026):
+> SRF, KOF, IAB, Personalwirtschaft, ki-im-personalwesen.de. Alle übrigen
+> Pool-Quellen (UBS, BFS, Bundesrat, Mercer, Deloitte, McKinsey, Gartner,
+> Workday, Kienbaum, BCG, Adecco/Stellenmarkt-Monitor, Swissmem, Swissstaffing,
+> IGBCE/BAVC, Böckler/WSI, ifo, IW Köln/KOFA, DIHK, BA, VDI) bieten keinen
+> nutzbaren Feed und werden über die Sekundärquellen SRF und Personalwirtschaft
+> miterfasst. Neue Feed-Kandidaten mit `python hr_digest.py --check-feeds`
+> testen (in GitHub Actions: Run workflow → check-feeds).
 
 ---
 
