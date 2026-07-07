@@ -46,16 +46,18 @@ jobs:
 
       - name: Convert to PDF
         run: |
-          # PDF für Business-Nutzer: klickbar und direkt lesbar auf GitHub,
-          # Branding bleibt 1:1 erhalten (Chrome ist auf dem Runner vorinstalliert)
+          # PDF für Business-Nutzer: klickbar und direkt lesbar,
+          # Branding bleibt 1:1 erhalten (Chrome ist auf dem Runner vorinstalliert).
+          # Das HTML dient nur als Zwischenschritt und wird nicht abgelegt.
           for f in *.html; do
             [ -e "$f" ] || continue
             google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer \
               --print-to-pdf="${f%.html}.pdf" "file://$PWD/$f"
           done
+          rm -f *.html
 
       - name: Move output
-        run: mkdir -p output && mv *.html *.pdf output/ 2>/dev/null || true
+        run: mkdir -p output && mv *.pdf output/ 2>/dev/null || true
 
       - name: Commit and push
         run: |
