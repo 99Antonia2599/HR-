@@ -50,7 +50,11 @@ jobs:
           git config user.name "HR News Bot"
           git config user.email "bot@noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "HR Digest $(date +%Y-%m-%d)"
-          # Falls main sich während des Laufs bewegt hat: erst rebasen, dann pushen
-          git pull --rebase origin main
-          git push
+          if git diff --staged --quiet; then
+            echo "Keine neuen Digest-Dateien — nichts zu committen"
+          else
+            git commit -m "HR Digest $(date +%Y-%m-%d)"
+            # Falls der Branch sich während des Laufs bewegt hat: erst rebasen
+            git pull --rebase origin "${{ github.ref_name }}"
+            git push
+          fi

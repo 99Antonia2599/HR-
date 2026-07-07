@@ -39,22 +39,22 @@ from collections import defaultdict
 # Böckler/WSI, IW Köln) miterfasst.
 FEEDS = [
     # ── Schweiz ──
-    ("SRF Wirtschaft",              "https://www.srf.ch/news/wirtschaft.rss"),
+    ("SRF News",                    "https://www.srf.ch/news/bnf/rss/1646"),
+    ("SRF Wirtschaft (Kandidat)",   "https://www.srf.ch/news/bnf/rss/1926"),
     ("KOF ETH Konjunktur",          "https://kof.ethz.ch/news-und-veranstaltungen/news.rss.xml"),
-    ("Bundesrat / admin.ch",        "https://www.admin.ch/gov/de/start/dokumentation/medienmitteilungen.rss.html"),
-    ("BFS Neues",                   "https://www.bfs.admin.ch/bfs/de/home/aktuell/neue-veroeffentlichungen.gnpdetail.rss.html"),
-    ("Swissstaffing",               "https://www.swissstaffing.ch/feed/"),
+    ("admin.ch NSB (Kandidat)",     "https://www.news.admin.ch/NSBSubscriber/message/rss/de"),
+    ("BFS (Kandidat)",              "https://www.bfs.admin.ch/bfs/de/home/aktuell/medienmitteilungen.rss.html"),
 
     # ── Deutschland ──
-    ("WSI / Hans-Böckler-Stiftung", "https://www.boeckler.de/de/boeckler-impuls-rss.xml"),
-    ("IAB Forschung",               "https://www.iab-forum.de/feed/"),
-    ("ifo Institut",                "https://www.ifo.de/feed/rss/ifo-news"),
-    ("IW Köln / KOFA",              "https://www.iwkoeln.de/rss/presse.xml"),
+    ("Böckler Impuls (Kandidat)",   "https://www.boeckler.de/rss/boeckler-impuls.xml"),
+    ("IAB Forschung",               "https://iab-forum.de/feed/"),
+    ("ifo (Kandidat)",              "https://www.ifo.de/rss.xml"),
+    ("IW Köln (Kandidat)",          "https://www.iwkoeln.de/rss.xml"),
 
     # ── HR-Tech / KI im Personalwesen ──
-    ("Personalwirtschaft",          "https://www.personalwirtschaft.de/rss/feed.xml"),
-    ("HRpuls",                      "https://hrpuls.de/feed/"),
-    ("KI im Personalwesen",         "https://ki-im-personalwesen.de/feed/"),
+    ("Personalwirtschaft (Kand.)",  "https://www.personalwirtschaft.de/feed/"),
+    ("HRpuls",                      "https://www.hrpuls.de/feed/"),
+    ("KI im Personalwesen",         "https://www.ki-im-personalwesen.de/feed/"),
 ]
 
 # ── Die 5 Themen (Section 5) ──────────────────────────────
