@@ -42,8 +42,18 @@ jobs:
           # automatisch erkannt und als Base64 eingebettet
           python hr_digest.py $ARGS
 
+      - name: Convert to PDF
+        run: |
+          # PDF für Business-Nutzer: klickbar und direkt lesbar auf GitHub,
+          # Branding bleibt 1:1 erhalten (Chrome ist auf dem Runner vorinstalliert)
+          for f in *.html; do
+            [ -e "$f" ] || continue
+            google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer \
+              --print-to-pdf="${f%.html}.pdf" "file://$PWD/$f"
+          done
+
       - name: Move output
-        run: mkdir -p output && mv *.html output/ 2>/dev/null || true
+        run: mkdir -p output && mv *.html *.pdf output/ 2>/dev/null || true
 
       - name: Commit and push
         run: |

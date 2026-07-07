@@ -367,8 +367,8 @@ HR market intelligence, labour-market data, tariff developments, organisational/
 | Manueller Lauf | Actions → "HR Digest — Model AG" → Run workflow (Format wählbar: digest / full-report) |
 | Lokal, Format A | `pip install -r requirements.txt && python hr_digest.py` |
 | Lokal, Format B | `python hr_digest.py --full` |
-| Logo | `MODEL_Logo_Medium.jpg` ins Repo-Root legen — wird automatisch als Base64 eingebettet |
-| Output | HTML-Dateien in `output/` |
+| Logo | `MODEL_Logo*.jpg/png` ins Repo-Root legen — wird automatisch als Base64 eingebettet |
+| Output | HTML **und PDF** in `output/` — das PDF ist auf GitHub direkt anklick- und lesbar (für Business-Nutzer), das HTML ist die Quelle fürs Weiterleiten per Mail |
 
 ---
 
@@ -376,6 +376,7 @@ HR market intelligence, labour-market data, tariff developments, organisational/
 
 - **v1.0** — initial release, May 2026. Format A and Format B specifications locked from approved reference outputs (HR_Digest_KW21_2026.html and HR_Intelligence_Report_KW21_2026.html). Source pool reverse-engineered from the original Gemini reference report plus DMA Core research validation.
 - **v1.1** — Juli 2026. Umbau des Repo-Flows auf diese Spezifikation: Quellen-Pool auf Section 6 ausgerichtet, GitHub Action repariert (Workflow-Datei lag ausserhalb von `.github/workflows/`), Format-B-Footer und Maßnahmen-Labels an Spec angeglichen.
+- **v1.2** — Juli 2026. Feed-URLs per check-feeds-Diagnose verifiziert und bereinigt. Auf Wunsch des Owners erzeugt der Workflow zusätzlich zum HTML ein PDF (auf GitHub direkt lesbar); Ausnahme zur Regel "kein PDF" in Section 12, da explizit angefordert.
 
 ---
 
