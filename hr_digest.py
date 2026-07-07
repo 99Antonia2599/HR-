@@ -121,7 +121,7 @@ THEMES = {
         "label": "KI im Personalwesen",
         "label_full": "KI im Personalwesen (HR-Tech)",
         "keywords": [
-            "künstliche intelligenz", " ki ", "ki-", "ai act",
+            "künstliche intelligenz", "ki", "ai act",
             "eu ai act", "hr-tech", "hr-software", "people analytics",
             "automatisierung", "digitalisierung", "chatbot",
             "machine learning", "generative ki", "large language",
@@ -153,6 +153,11 @@ BLACKLIST = [
     "rezept", "kochen", "reise", "urlaub", "hotel", "flug",
     "aktie", "bitcoin", "krypto", "etf", "depot", "börse",
     "streaming", "smart home", "gadget", "testbericht",
+    # Lifestyle-/Magazin-Themen, die kein HR-Marktbericht sind
+    "ferien", "sommerferien", "hot take", "streitgespräch",
+    "wechseljahre", "quiz", "rätsel", "gewinnspiel", "horoskop",
+    "wetter", "fussball", "fußball", "olympia", "festival",
+    "konzert", "kino", "film", "serie", "royals", "promi",
 ]
 
 
@@ -160,6 +165,33 @@ BLACKLIST = [
 
 def clean_html(text):
     return re.sub(r"<[^>]+>", "", text or "").strip()
+
+
+def _kw_regex(kw):
+    """Regex für ein Stichwort mit Wortgrenze am Anfang.
+
+    Kurze Stichworte (≤4 Zeichen, z.B. 'ki', 'lohn', 'gav') müssen als
+    ganzes Wort stehen, damit 'lohn' nicht in 'Belohnung' matcht.
+    Längere dürfen als Wortanfang matchen ('tarif' → 'Tarifvertrag')."""
+    kw = kw.strip().lower()
+    esc = re.escape(kw)
+    if len(kw) <= 4:
+        return re.compile(r"\b" + esc + r"\b")
+    return re.compile(r"\b" + esc)
+
+
+def count_keyword_hits(text, regexes):
+    """Zählt, wie viele verschiedene Stichworte im Text vorkommen."""
+    text_lower = text.lower()
+    return sum(1 for rx in regexes if rx.search(text_lower))
+
+
+# Vorkompilierte Stichwort-Regexes (Wortgrenzen statt Teilstrings)
+THEME_REGEXES = {
+    key: [_kw_regex(k) for k in theme["keywords"]]
+    for key, theme in THEMES.items()
+}
+ALL_REGEXES = [_kw_regex(k) for k in ALL_KEYWORDS]
 
 
 def parse_date(entry):
@@ -178,28 +210,29 @@ def is_blacklisted(title):
     return any(b in t for b in BLACKLIST)
 
 
-def is_relevant(title, summary, keywords):
+def is_relevant(title, summary):
     if is_blacklisted(title):
         return False
-    title_lower = title.lower()
-    if any(k in title_lower for k in keywords):
+    # Treffer im Titel = klarer HR-Bezug; sonst braucht es mehrere
+    # verschiedene Stichworte im Text (gegen thematische Streifschüsse)
+    if count_keyword_hits(title, ALL_REGEXES) >= 1:
         return True
-    text_lower = summary.lower()
-    hits = sum(1 for k in keywords if k in text_lower)
-    return hits >= 2
+    return count_keyword_hits(summary, ALL_REGEXES) >= 3
 
 
 def classify_theme(text):
-    """Ordnet Text dem besten der 5 Themen zu."""
-    text_lower = text.lower()
+    """Ordnet Text dem besten der 5 Themen zu.
+
+    Mindestens 2 verschiedene Themen-Stichworte nötig — ein einzelner
+    Zufallstreffer reicht nicht für die Aufnahme in den Bericht."""
     best_key = None
     best_score = 0
-    for key, theme in THEMES.items():
-        score = sum(1 for k in theme["keywords"] if k in text_lower)
+    for key, regexes in THEME_REGEXES.items():
+        score = count_keyword_hits(text, regexes)
         if score > best_score:
             best_score = score
             best_key = key
-    return best_key if best_key and best_score > 0 else None
+    return best_key if best_key and best_score >= 2 else None
 
 
 # ── Paywall-Erkennung ──────────────────────────────────────
@@ -328,9 +361,7 @@ def score_sentence(sentence, title_words):
         if w in title_words:
             score += 2.0
     sent_lower = sentence.lower()
-    for kw in ALL_KEYWORDS:
-        if kw in sent_lower:
-            score += 1.5
+    score += 1.5 * count_keyword_hits(sentence, ALL_REGEXES)
     if re.search(r'\d+[,.]?\d*\s*(%|Prozent|Euro|Milliard|Million|Franken|CHF)', sentence):
         score += 2.0
     if len(words) > 40:
@@ -427,7 +458,7 @@ def scrape():
                 continue
             title = getattr(entry, "title", "")
             rss_summary = clean_html(getattr(entry, "summary", ""))
-            if not is_relevant(title, rss_summary, ALL_KEYWORDS):
+            if not is_relevant(title, rss_summary):
                 continue
             seen.add(link)
             articles.append({
