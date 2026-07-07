@@ -471,15 +471,14 @@ def pick_best_articles(theme_articles, n=3):
 
 def load_logo_base64(logo_path=None):
     """Versucht Logo als Base64 zu laden. Gibt None zurück falls nicht vorhanden."""
+    import glob
     paths_to_try = []
     if logo_path:
         paths_to_try.append(logo_path)
-    paths_to_try += [
-        "MODEL_Logo_Medium.jpg",
-        "MODEL_Logo.jpg",
-        "MODEL_Logo_Medium.png",
-        "MODEL_Logo.png",
-    ]
+    # Gemäss Anweisungen: MODEL_Logo_Medium.jpg oder MODEL_Logo_*.jpg/png
+    paths_to_try += ["MODEL_Logo_Medium.jpg"]
+    paths_to_try += sorted(glob.glob("MODEL_Logo*.jpg"))
+    paths_to_try += sorted(glob.glob("MODEL_Logo*.png"))
     for p in paths_to_try:
         if os.path.isfile(p):
             ext = os.path.splitext(p)[1].lower()

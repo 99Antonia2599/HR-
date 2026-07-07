@@ -36,11 +36,9 @@ jobs:
           if [ "${{ github.event.inputs.format }}" = "full-report" ]; then
             ARGS="--full"
           fi
-          if [ -f MODEL_Logo_Medium.jpg ]; then
-            python hr_digest.py $ARGS --logo MODEL_Logo_Medium.jpg
-          else
-            python hr_digest.py $ARGS
-          fi
+          # Logo (MODEL_Logo*.jpg/png im Repo-Root) wird vom Script
+          # automatisch erkannt und als Base64 eingebettet
+          python hr_digest.py $ARGS
 
       - name: Move output
         run: mkdir -p output && mv *.html output/ 2>/dev/null || true
