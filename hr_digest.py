@@ -27,29 +27,34 @@ from collections import defaultdict
 
 # ── Konfiguration ──────────────────────────────────────────
 
-# Quellen-Pool gemäss Projekt-Anweisungen (Section 6)
+# Quellen-Pool gemäss Projekt-Anweisungen (Section 6).
+# Nur Quellen aus dem definierten Pool — keine Blogs, keine
+# Vendor-Whitepapers, keine Jobbörsen-Marketinginhalte.
+#
+# Pool-Quellen ohne öffentlichen RSS-Feed (UBS Outlook, Mercer,
+# Deloitte, McKinsey, Gartner, Workday, Kienbaum, BCG, Adecco/
+# Stellenmarkt-Monitor UZH, Swissmem, IGBCE/BAVC, DIHK, BA,
+# VDI, EU AI Act) erscheinen als Jahres-/Referenzstudien und
+# werden über die Sekundärquellen (SRF, Personalwirtschaft,
+# Böckler/WSI, IW Köln) miterfasst.
 FEEDS = [
     # ── Schweiz ──
     ("SRF Wirtschaft",              "https://www.srf.ch/news/wirtschaft.rss"),
-    ("KOF ETH Konjunktur",         "https://kof.ethz.ch/news-und-veranstaltungen/news.rss.xml"),
-    ("Swissstaffing",              "https://www.swissstaffing.ch/feed/"),
-    ("BFS Neues",                  "https://www.bfs.admin.ch/bfs/de/home/aktuell/neue-veroeffentlichungen.gnpdetail.rss.html"),
+    ("KOF ETH Konjunktur",          "https://kof.ethz.ch/news-und-veranstaltungen/news.rss.xml"),
+    ("Bundesrat / admin.ch",        "https://www.admin.ch/gov/de/start/dokumentation/medienmitteilungen.rss.html"),
+    ("BFS Neues",                   "https://www.bfs.admin.ch/bfs/de/home/aktuell/neue-veroeffentlichungen.gnpdetail.rss.html"),
+    ("Swissstaffing",               "https://www.swissstaffing.ch/feed/"),
 
     # ── Deutschland ──
-    ("Hans-Böckler-Stiftung",      "https://www.boeckler.de/de/boeckler-impuls-rss.xml"),
-    ("IAB Forschung",              "https://www.iab-forum.de/feed/"),
-    ("ifo Institut",               "https://www.ifo.de/feed/rss/ifo-news"),
-    ("IW Köln",                    "https://www.iwkoeln.de/rss/presse.xml"),
+    ("WSI / Hans-Böckler-Stiftung", "https://www.boeckler.de/de/boeckler-impuls-rss.xml"),
+    ("IAB Forschung",               "https://www.iab-forum.de/feed/"),
+    ("ifo Institut",                "https://www.ifo.de/feed/rss/ifo-news"),
+    ("IW Köln / KOFA",              "https://www.iwkoeln.de/rss/presse.xml"),
 
-    # ── HR-Fachmedien (DE/CH) ──
-    ("Personalwirtschaft",         "https://www.personalwirtschaft.de/rss/feed.xml"),
-    ("HRM Online",                 "https://www.hrm.de/feed/"),
-    ("Haufe Personal",             "https://www.haufe.de/personal/rss_366_488.xml"),
-    ("HR Journal",                 "https://www.hrjournal.de/feed/"),
-    ("Persoblogger",               "https://persoblogger.de/feed/"),
-
-    # ── HR-Tech / KI ──
-    ("Personalwirtschaft (Tech)",  "https://www.personalwirtschaft.de/rss/feed.xml"),
+    # ── HR-Tech / KI im Personalwesen ──
+    ("Personalwirtschaft",          "https://www.personalwirtschaft.de/rss/feed.xml"),
+    ("HRpuls",                      "https://hrpuls.de/feed/"),
+    ("KI im Personalwesen",         "https://ki-im-personalwesen.de/feed/"),
 ]
 
 # ── Die 5 Themen (Section 5) ──────────────────────────────
@@ -466,15 +471,14 @@ def pick_best_articles(theme_articles, n=3):
 
 def load_logo_base64(logo_path=None):
     """Versucht Logo als Base64 zu laden. Gibt None zurück falls nicht vorhanden."""
+    import glob
     paths_to_try = []
     if logo_path:
         paths_to_try.append(logo_path)
-    paths_to_try += [
-        "MODEL_Logo_Medium.jpg",
-        "MODEL_Logo.jpg",
-        "MODEL_Logo_Medium.png",
-        "MODEL_Logo.png",
-    ]
+    # Gemäss Anweisungen: MODEL_Logo_Medium.jpg oder MODEL_Logo_*.jpg/png
+    paths_to_try += ["MODEL_Logo_Medium.jpg"]
+    paths_to_try += sorted(glob.glob("MODEL_Logo*.jpg"))
+    paths_to_try += sorted(glob.glob("MODEL_Logo*.png"))
     for p in paths_to_try:
         if os.path.isfile(p):
             ext = os.path.splitext(p)[1].lower()
@@ -853,7 +857,7 @@ def build_recommendations_html():
     for i, rec in enumerate(recs, 1):
         items_html += f"""
       <div class="rec-item">
-        <span class="rec-num">Massnahme {i}</span>
+        <span class="rec-num">Maßnahme {i}</span>
         <h4>{rec['title']}</h4>
         <div class="rec-row">
           <span class="key">Ziel</span>
@@ -868,7 +872,7 @@ def build_recommendations_html():
     return f"""
   <div class="recs">
     <span class="recs-tag">Handlungsempfehlungen für die HR-Leitung</span>
-    <h2>Drei strategische Sofortmassnahmen für die Model AG</h2>
+    <h2>Drei strategische Sofortmaßnahmen für die Model AG</h2>
     <p class="recs-intro">Abgeleitet aus den aktuellen Marktentwicklungen — priorisiert nach Handlungsdruck.</p>
     {items_html}
   </div>"""
@@ -947,7 +951,7 @@ def build_format_b(articles, logo_b64):
   {recs_html}
 
   <footer class="doc-footer">
-    <span>HR Intelligence Report · Model AG · KW {kw}/{year} · Erstellt durch DMA Core · Vertraulich — Intern</span>
+    <span>HR Intelligence Report · Model AG · KW {kw}/{year}<br>Erstellt durch DMA Core · Vertraulich — Intern</span>
     <div class="footer-logo">{logo_footer}</div>
   </footer>
 
