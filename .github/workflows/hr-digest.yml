@@ -9,10 +9,11 @@ on:
       format:
         description: 'Ausgabeformat'
         type: choice
-        default: 'digest'
+        default: 'both'
         options:
-          - digest        # Format A — Kurzdigest (Default)
-          - full-report   # Format B — Vollständiger HR Intelligence Report
+          - both          # Kurzdigest + Vollreport (Default, wie Montags-Lauf)
+          - digest        # Nur Format A — Kurzdigest
+          - full-report   # Nur Format B — Vollständiger HR Intelligence Report
           - check-feeds   # Nur Feed-Gesundheitscheck (kein HTML, kein Commit)
 
 permissions:
@@ -33,14 +34,15 @@ jobs:
 
       - name: Generate HR Digest
         run: |
-          ARGS=""
-          case "${{ github.event.inputs.format }}" in
-            full-report) ARGS="--full" ;;
-            check-feeds) ARGS="--check-feeds" ;;
-          esac
           # Logo (MODEL_Logo*.jpg/png im Repo-Root) wird vom Script
-          # automatisch erkannt und als Base64 eingebettet
-          python hr_digest.py $ARGS
+          # automatisch erkannt und als Base64 eingebettet.
+          # Zeitplan-Läufe (leerer Input) erzeugen beide Formate.
+          case "${{ github.event.inputs.format }}" in
+            digest)      python hr_digest.py ;;
+            full-report) python hr_digest.py --full ;;
+            check-feeds) python hr_digest.py --check-feeds ;;
+            *)           python hr_digest.py && python hr_digest.py --full ;;
+          esac
 
       - name: Convert to PDF
         run: |
