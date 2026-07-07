@@ -595,11 +595,35 @@ footer.foot img { height: 20px; opacity: 0.55; }
 """
 
 
+def article_links_html(articles, font_size="11px"):
+    """Anklickbare Quellenangaben: Medium, Titel, Datum, Link."""
+    if not articles:
+        return ""
+    parts = []
+    for a in articles:
+        date_str = a["date"].strftime("%d.%m.%Y") if a.get("date") else ""
+        label = f'{_esc(a["source"])}: «{_esc(a["title"][:90])}»'
+        if date_str:
+            label += f" ({date_str})"
+        parts.append(
+            f'<a href="{_esc(a["url"])}" '
+            f'style="color:#808080;text-decoration:underline;">{label}</a>'
+        )
+    joined = "<br>".join(parts)
+    return (
+        f'<p style="font-size:{font_size};color:#808080;'
+        f'margin:10px 0 0 0;line-height:1.6;">'
+        f'<span style="text-transform:uppercase;letter-spacing:0.14em;'
+        f'font-weight:600;font-size:10px;">Quellen</span><br>{joined}</p>'
+    )
+
+
 def build_bullet_html(theme_key, articles):
     """Baut einen Bullet-Block für Format A."""
     theme = THEMES[theme_key]
     num_tag = theme_key  # z.B. "01 · Lohn"
 
+    best = []
     if not articles:
         headline = f"{theme['label']}: Keine wesentlichen Veränderungen"
         body = "Im Berichtszeitraum wurden keine signifikanten neuen Entwicklungen identifiziert. Die Marktlage bleibt stabil auf dem zuletzt berichteten Niveau."
@@ -639,6 +663,7 @@ def build_bullet_html(theme_key, articles):
           <strong>Für Model AG</strong>
           {relevance}
         </div>
+        {article_links_html(best)}
       </div>
     </div>"""
 
@@ -733,7 +758,7 @@ def build_format_a(articles, logo_b64):
   {bullets_html}
 
   <div class="sources">
-    <span class="label">Quellen</span>
+    <span class="label">Ausgewertete Quellen</span>
     {_esc(sources_str)}
   </div>
 
@@ -820,7 +845,6 @@ def build_theme_section_html(theme_key, articles):
 
     # Fact blocks
     facts_html = ""
-    sources_list = []
     for a in best:
         summary = a.get("summary", "")
         # Bold numbers
@@ -834,7 +858,6 @@ def build_theme_section_html(theme_key, articles):
         <div class="fact">
           <p><span class="lead">{_esc(title_short)}.</span> {summary}</p>
         </div>"""
-        sources_list.append(f"{a['source']}")
 
     if not facts_html:
         facts_html = """
@@ -843,7 +866,21 @@ def build_theme_section_html(theme_key, articles):
         </div>"""
 
     relevance = generate_relevance_note(theme_key, best)
-    sources_str = " · ".join(sorted(set(sources_list))) if sources_list else "—"
+
+    if best:
+        links = []
+        for a in best:
+            date_str = a["date"].strftime("%d.%m.%Y") if a.get("date") else ""
+            label = f'{_esc(a["source"])}: «{_esc(a["title"][:90])}»'
+            if date_str:
+                label += f" ({date_str})"
+            links.append(
+                f'<a href="{_esc(a["url"])}" '
+                f'style="color:#808080;text-decoration:underline;">{label}</a>'
+            )
+        sources_html = "<br>".join(links)
+    else:
+        sources_html = "—"
 
     return f"""
   <section class="theme">
@@ -861,7 +898,7 @@ def build_theme_section_html(theme_key, articles):
 
     <div class="sources">
       <strong>Quellen</strong>
-      {_esc(sources_str)}
+      {sources_html}
     </div>
   </section>"""
 
