@@ -371,6 +371,35 @@ def summarize_text(text, title, num_sentences=3):
     return " ".join(s[2] for s in top)
 
 
+# ── Feed-Diagnose ──────────────────────────────────────────
+
+def check_feeds():
+    """Prüft jeden Feed: erreichbar? Wie viele Einträge? Wie aktuell?"""
+    print(f"{'Feed':<30} {'HTTP':>5} {'Einträge':>9} {'Neuester':>12}  Hinweis")
+    print("-" * 85)
+    for name, url in FEEDS:
+        try:
+            feed = feedparser.parse(url, agent="Mozilla/5.0 (HRDigest)")
+        except Exception as e:
+            print(f"{name:<30} {'ERR':>5} {'-':>9} {'-':>12}  {e}")
+            continue
+        status = feed.get("status", "?")
+        entries = len(feed.entries)
+        newest = "-"
+        if feed.entries:
+            d = parse_date(feed.entries[0])
+            if d:
+                newest = d.strftime("%d.%m.%Y")
+        hint = ""
+        if feed.bozo and entries == 0:
+            hint = f"Parse-Fehler: {getattr(feed, 'bozo_exception', '')}"
+        elif status in (301, 302) :
+            hint = f"Redirect → {feed.get('href', '')}"
+        elif status == 404 or entries == 0:
+            hint = "TOT oder leer — URL prüfen"
+        print(f"{name:<30} {status:>5} {entries:>9} {newest:>12}  {hint}")
+
+
 # ── RSS Scraping ───────────────────────────────────────────
 
 def scrape():
@@ -992,7 +1021,15 @@ def main():
         "--output", type=str, default=None,
         help="Ausgabe-Dateiname (Default: auto-generiert)"
     )
+    parser.add_argument(
+        "--check-feeds", action="store_true",
+        help="Nur Feed-Gesundheitscheck ausgeben, kein HTML erzeugen"
+    )
     args = parser.parse_args()
+
+    if args.check_feeds:
+        check_feeds()
+        return
 
     fmt = "B" if args.full else "A"
     fmt_label = "HR Intelligence Report (Format B)" if args.full else "HR Digest (Format A)"

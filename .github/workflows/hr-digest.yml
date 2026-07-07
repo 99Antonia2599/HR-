@@ -13,6 +13,7 @@ on:
         options:
           - digest        # Format A — Kurzdigest (Default)
           - full-report   # Format B — Vollständiger HR Intelligence Report
+          - check-feeds   # Nur Feed-Gesundheitscheck (kein HTML, kein Commit)
 
 permissions:
   contents: write
@@ -33,9 +34,10 @@ jobs:
       - name: Generate HR Digest
         run: |
           ARGS=""
-          if [ "${{ github.event.inputs.format }}" = "full-report" ]; then
-            ARGS="--full"
-          fi
+          case "${{ github.event.inputs.format }}" in
+            full-report) ARGS="--full" ;;
+            check-feeds) ARGS="--check-feeds" ;;
+          esac
           # Logo (MODEL_Logo*.jpg/png im Repo-Root) wird vom Script
           # automatisch erkannt und als Base64 eingebettet
           python hr_digest.py $ARGS
