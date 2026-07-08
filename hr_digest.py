@@ -798,14 +798,14 @@ html, body {
 .cover-meta { text-align: right; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grau50); line-height: 1.7; }
 h1.cover-title { font-family: 'Messina Serif', Georgia, serif; font-weight: 400; font-size: 44px; line-height: 1.1; margin: 0 0 18px 0; }
 .cover-subtitle { font-family: 'Messina Serif', Georgia, serif; font-style: italic; font-size: 18px; color: var(--grau50); margin-bottom: 28px; }
-.doc-meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--grau10); }
+.doc-meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--grau10); }
 .doc-meta-grid .item .label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grau50); margin-bottom: 4px; display: block; }
 .doc-meta-grid .item .value { font-size: 14px; font-weight: 500; }
 section.theme { margin-bottom: 56px; }
 .theme-number { font-family: 'Messina Serif', Georgia, serif; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--coral); margin-bottom: 8px; display: block; font-weight: 600; }
 h2.theme-title { font-weight: 600; font-size: 26px; line-height: 1.2; margin: 0 0 18px 0; }
 .theme-intro { font-size: 15px; line-height: 1.6; margin-bottom: 28px; }
-h3.subsection { font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--grau50); margin: 28px 0 14px 0; padding-bottom: 6px; border-bottom: 1px solid var(--grau10); }
+h3.subsection { font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--grau50); margin: 28px 0 14px 0; }
 .fact { border-left: 3px solid var(--coral); padding: 4px 0 4px 18px; margin-bottom: 18px; }
 .fact .lead { font-weight: 600; }
 .fact p { margin: 0; }
@@ -833,14 +833,18 @@ footer.doc-footer { margin-top: 64px; padding-top: 24px; border-top: 4px solid v
 footer.doc-footer .footer-logo img { height: 24px; opacity: 0.6; }
 /* Quelle direkt unter jedem Faktenblock */
 a.fact-source { display: inline-block; margin-top: 8px; font-size: 11px; color: var(--grau50); text-decoration: underline; }
-/* Saubere Seitenumbrüche im PDF-Druck */
+/* Saubere Seitenumbrüche im PDF-Druck.
+   Nur kleine Einheiten atomar halten — NICHT die ganze Themen-Section,
+   sonst springt ein Thema als Block auf die nächste Seite und lässt
+   grosse Lücken. So fliessen die Fakten und füllen die Seiten. */
 @page { margin: 14mm; }
-.theme, .fact, .relevance, .lead-callout, .rec-item, .doc-meta-grid, .cover {
+.fact, .relevance, .lead-callout, .rec-item, .doc-meta-grid {
   break-inside: avoid; page-break-inside: avoid;
 }
 .theme-number, h2.theme-title, h3.subsection, .recs h2, h1.cover-title {
   break-after: avoid; page-break-after: avoid;
 }
+section.theme { margin-bottom: 40px; }
 """
 
 
@@ -1038,10 +1042,6 @@ def build_format_b(articles, logo_b64):
       <div class="item">
         <span class="label">Fokus-Regionen</span>
         <span class="value">CH · DE</span>
-      </div>
-      <div class="item">
-        <span class="label">Owner</span>
-        <span class="value">DMA Core</span>
       </div>
     </div>
   </div>
