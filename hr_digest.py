@@ -592,6 +592,10 @@ h1.title { font-weight: 600; font-size: 26px; line-height: 1.2; margin: 0 0 6px 
 .sources .label { text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; font-size: 10px; margin-bottom: 6px; display: block; }
 footer.foot { margin-top: 36px; padding-top: 18px; border-top: 3px solid var(--coral); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grau50); display: flex; justify-content: space-between; align-items: center; }
 footer.foot img { height: 20px; opacity: 0.55; }
+/* Saubere Seitenumbrüche im PDF-Druck */
+@page { margin: 14mm; }
+.bullet, header.head { break-inside: avoid; page-break-inside: avoid; }
+.bullet-head { break-after: avoid; page-break-after: avoid; }
 """
 
 
@@ -827,6 +831,16 @@ h3.subsection { font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-
 .rec-row .key { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); padding-top: 3px; font-weight: 600; }
 footer.doc-footer { margin-top: 64px; padding-top: 24px; border-top: 4px solid var(--coral); display: flex; justify-content: space-between; align-items: center; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grau50); }
 footer.doc-footer .footer-logo img { height: 24px; opacity: 0.6; }
+/* Quelle direkt unter jedem Faktenblock */
+a.fact-source { display: inline-block; margin-top: 8px; font-size: 11px; color: var(--grau50); text-decoration: underline; }
+/* Saubere Seitenumbrüche im PDF-Druck */
+@page { margin: 14mm; }
+.theme, .fact, .relevance, .lead-callout, .rec-item, .doc-meta-grid, .cover {
+  break-inside: avoid; page-break-inside: avoid;
+}
+.theme-number, h2.theme-title, h3.subsection, .recs h2, h1.cover-title {
+  break-after: avoid; page-break-after: avoid;
+}
 """
 
 
@@ -843,7 +857,7 @@ def build_theme_section_html(theme_key, articles):
     else:
         intro = "Im aktuellen Berichtszeitraum wurden keine wesentlichen neuen Entwicklungen identifiziert."
 
-    # Fact blocks
+    # Fact blocks — jeder mit seiner Quelle direkt darunter
     facts_html = ""
     for a in best:
         summary = a.get("summary", "")
@@ -854,9 +868,18 @@ def build_theme_section_html(theme_key, articles):
             summary
         )
         title_short = a["title"][:80]
+        date_str = a["date"].strftime("%d.%m.%Y") if a.get("date") else ""
+        src_label = _esc(a["source"])
+        if date_str:
+            src_label += f" · {date_str}"
+        source_line = (
+            f'<a class="fact-source" href="{_esc(a["url"])}">'
+            f'Quelle: {src_label} — Artikel öffnen ↗</a>'
+        )
         facts_html += f"""
         <div class="fact">
           <p><span class="lead">{_esc(title_short)}.</span> {summary}</p>
+          {source_line}
         </div>"""
 
     if not facts_html:
@@ -866,21 +889,6 @@ def build_theme_section_html(theme_key, articles):
         </div>"""
 
     relevance = generate_relevance_note(theme_key, best)
-
-    if best:
-        links = []
-        for a in best:
-            date_str = a["date"].strftime("%d.%m.%Y") if a.get("date") else ""
-            label = f'{_esc(a["source"])}: «{_esc(a["title"][:90])}»'
-            if date_str:
-                label += f" ({date_str})"
-            links.append(
-                f'<a href="{_esc(a["url"])}" '
-                f'style="color:#808080;text-decoration:underline;">{label}</a>'
-            )
-        sources_html = "<br>".join(links)
-    else:
-        sources_html = "—"
 
     return f"""
   <section class="theme">
@@ -894,11 +902,6 @@ def build_theme_section_html(theme_key, articles):
     <div class="relevance">
       <span class="label">Relevanz für die Model AG</span>
       <p>{relevance}</p>
-    </div>
-
-    <div class="sources">
-      <strong>Quellen</strong>
-      {sources_html}
     </div>
   </section>"""
 
