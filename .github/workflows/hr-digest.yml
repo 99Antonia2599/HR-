@@ -2,8 +2,8 @@ name: HR Digest — Model AG
 
 on:
   schedule:
-    # Jeden Montag 07:00 UTC (08:00/09:00 Schweizer Zeit)
-    - cron: '0 7 * * 1'
+    # Täglich 05:00 UTC = 07:00 MESZ (Sommer) / 06:00 MEZ (Winter)
+    - cron: '0 5 * * *'
   workflow_dispatch:
     inputs:
       format:
