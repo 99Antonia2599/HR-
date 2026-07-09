@@ -751,8 +751,7 @@ def build_format_a(articles, logo_b64):
       {logo_header}
       <div class="head-meta">
         HR Digest · KW {kw}/{year}<br>
-        {date_str}<br>
-        Vertraulich — Intern
+        {date_str}
       </div>
     </div>
     <h1 class="title">HR Digest für die Model AG</h1>
@@ -767,7 +766,7 @@ def build_format_a(articles, logo_b64):
   </div>
 
   <footer class="foot">
-    <span>Erstellt durch DMA Core · Für: Michael Uebersax, HR-Leitung</span>
+    <span>HR Digest · Model AG</span>
     {logo_footer}
   </footer>
 
@@ -1024,8 +1023,7 @@ def build_format_b(articles, logo_b64):
     <div class="cover-top">
       <div class="cover-logo">{logo_cover}</div>
       <div class="cover-meta">
-        Ausgabe KW {kw}/{year}<br>
-        Vertraulich — Intern
+        Ausgabe KW {kw}/{year}
       </div>
     </div>
     <h1 class="cover-title">HR Intelligence Report</h1>
@@ -1053,7 +1051,7 @@ def build_format_b(articles, logo_b64):
   {recs_html}
 
   <footer class="doc-footer">
-    <span>HR Intelligence Report · Model AG · KW {kw}/{year}<br>Erstellt durch DMA Core · Vertraulich — Intern</span>
+    <span>HR Intelligence Report · Model AG · KW {kw}/{year}</span>
     <div class="footer-logo">{logo_footer}</div>
   </footer>
 

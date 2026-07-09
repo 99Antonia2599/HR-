@@ -2,8 +2,8 @@ name: HR Digest — Model AG
 
 on:
   schedule:
-    # Jeden Montag 07:00 UTC (08:00/09:00 Schweizer Zeit)
-    - cron: '0 7 * * 1'
+    # Täglich 05:00 UTC = 07:00 MESZ (Sommer) / 06:00 MEZ (Winter)
+    - cron: '0 5 * * *'
   workflow_dispatch:
     inputs:
       format:
@@ -31,6 +31,10 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Get date
+        id: date
+        run: echo "date=$(date +%d.%m.%Y)" >> "$GITHUB_OUTPUT"
 
       - name: Generate HR Digest
         run: |
@@ -68,7 +72,14 @@ jobs:
             echo "Keine neuen Digest-Dateien — nichts zu committen"
           else
             git commit -m "HR Digest $(date +%Y-%m-%d)"
-            # Falls der Branch sich während des Laufs bewegt hat: erst rebasen
             git pull --rebase origin "${{ github.ref_name }}"
             git push
           fi
+
+      - name: Upload PDFs as artifact
+        if: github.event.inputs.format != 'check-feeds'
+        uses: actions/upload-artifact@v4
+        with:
+          name: hr-digest-${{ steps.date.outputs.date }}
+          path: output/*.pdf
+          retention-days: 90
