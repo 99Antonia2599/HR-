@@ -755,7 +755,7 @@ def build_format_a(articles, logo_b64):
       </div>
     </div>
     <h1 class="title">HR Digest für die Model AG</h1>
-    <p class="subtitle">Fünf Schlaglichter aus dem HR-Markt — aufbereitet für die HR-Leitung. Lesezeit: ca. 4 Minuten.</p>
+    <p class="subtitle">Die wichtigsten HR-Entwicklungen der Woche — aufbereitet für die HR-Leitung. Lesezeit: ca. 4 Minuten.</p>
   </header>
 
   {bullets_html}
