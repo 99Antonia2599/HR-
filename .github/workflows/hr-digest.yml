@@ -38,9 +38,6 @@ jobs:
 
       - name: Generate HR Digest
         run: |
-          # Logo (MODEL_Logo*.jpg/png im Repo-Root) wird vom Script
-          # automatisch erkannt und als Base64 eingebettet.
-          # Zeitplan-Läufe (leerer Input) erzeugen beide Formate.
           case "${{ github.event.inputs.format }}" in
             digest)      python hr_digest.py ;;
             full-report) python hr_digest.py --full ;;
@@ -50,9 +47,6 @@ jobs:
 
       - name: Convert to PDF
         run: |
-          # PDF für Business-Nutzer: klickbar und direkt lesbar,
-          # Branding bleibt 1:1 erhalten (Chrome ist auf dem Runner vorinstalliert).
-          # Das HTML dient nur als Zwischenschritt und wird nicht abgelegt.
           for f in *.html; do
             [ -e "$f" ] || continue
             google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer \
