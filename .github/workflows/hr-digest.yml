@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Get date
+        id: date
+        run: echo "date=$(date +%d.%m.%Y)" >> "$GITHUB_OUTPUT"
+
       - name: Generate HR Digest
         run: |
           # Logo (MODEL_Logo*.jpg/png im Repo-Root) wird vom Script
@@ -68,7 +72,26 @@ jobs:
             echo "Keine neuen Digest-Dateien — nichts zu committen"
           else
             git commit -m "HR Digest $(date +%Y-%m-%d)"
-            # Falls der Branch sich während des Laufs bewegt hat: erst rebasen
             git pull --rebase origin "${{ github.ref_name }}"
             git push
           fi
+
+      - name: Send digest via email
+        if: github.event.inputs.format != 'check-feeds'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "HR Intelligence Digest — ${{ steps.date.outputs.date }}"
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_FROM }}
+          body: |
+            Guten Morgen,
+
+            anbei der aktuelle HR Intelligence Digest von Model AG.
+
+            Freundliche Grüsse
+            HR News Bot
+          attachments: output/*.pdf
